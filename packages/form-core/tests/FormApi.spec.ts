@@ -2913,20 +2913,22 @@ describe('form api', () => {
       defaultValues: {
         items: ['item1', 'item2', 'item3'],
       },
-    });
+    })
 
-    form.mount();
+    form.mount()
 
     // Ensure the initial state has the fields
-    expect(form.getFieldValue('items')).toEqual(['item1', 'item2', 'item3']);
+    expect(form.getFieldValue('items')).toEqual(['item1', 'item2', 'item3'])
 
     // Reset the field to an empty array
-    form.setFieldValue('items', []);
+    form.setFieldValue('items', [])
 
     // Verify that the field value is now an empty array
-    expect(form.getFieldValue('items')).toEqual([]);
+    expect(form.getFieldValue('items')).toEqual([])
 
     // Verify that the fields are deleted
-    expect(Object.keys(form.fieldInfo).some((key) => key.startsWith('items'))).toBe(false);
-  });
+    expect(
+      Object.keys(form.fieldInfo).some((key) => key.startsWith('items')),
+    ).toBe(false)
+  })
 })
