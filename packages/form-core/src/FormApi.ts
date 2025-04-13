@@ -1963,6 +1963,29 @@ export class FormApi<
   }
 
   /**
+   * Clear all values within an array field.
+   */
+  clearFieldValues = <TField extends DeepKeys<TFormData>>(
+    field: TField,
+    opts?: UpdateMetaOptions,
+  ) => {
+    const fieldValue = this.getFieldValue(field)
+
+    const lastIndex = Array.isArray(fieldValue)
+      ? Math.max(fieldValue.length - 1, 0)
+      : null
+
+    this.setFieldValue(field, [] as any, opts)
+
+    if (lastIndex !== null) {
+      for (let i = 0; i <= lastIndex; i++) {
+        const fieldKey = `${field}[${lastIndex}]`
+        this.deleteField(fieldKey as never)
+      }
+    }
+  }
+
+  /**
    * Resets the field value and meta to default state
    */
   resetField = <TField extends DeepKeys<TFormData>>(field: TField) => {

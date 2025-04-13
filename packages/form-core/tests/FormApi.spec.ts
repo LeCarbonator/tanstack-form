@@ -2908,7 +2908,7 @@ describe('form api', () => {
     expect(form.state.canSubmit).toBe(true)
   })
 
-  it('should delete fields when resetting an array field to an empty array', () => {
+  it('should delete fields when calling clearFieldValues', () => {
     const form = new FormApi({
       defaultValues: {
         items: ['item1', 'item2', 'item3'],
@@ -2921,14 +2921,14 @@ describe('form api', () => {
     expect(form.getFieldValue('items')).toEqual(['item1', 'item2', 'item3'])
 
     // Reset the field to an empty array
-    form.setFieldValue('items', [])
+    form.clearFieldValues('items')
 
     // Verify that the field value is now an empty array
     expect(form.getFieldValue('items')).toEqual([])
 
     // Verify that the fields are deleted
     expect(
-      Object.keys(form.fieldInfo).some((key) => key.startsWith('items')),
+      Object.keys(form.fieldInfo).some((key) => key.startsWith('items[')),
     ).toBe(false)
   })
 })
