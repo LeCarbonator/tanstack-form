@@ -1963,6 +1963,82 @@ export class FormApi<
   }
 
   /**
+   * Clear all values within an array field.
+   */
+  clearFieldValues = <TField extends DeepKeys<TFormData>>(
+    field: TField,
+    opts?: UpdateMetaOptions,
+  ) => {
+    const fieldValue = this.getFieldValue(field)
+
+    const lastIndex = Array.isArray(fieldValue)
+      ? Math.max(fieldValue.length - 1, 0)
+      : null
+
+    this.setFieldValue(field, [] as any, opts)
+
+    if (lastIndex !== null) {
+      for (let i = 0; i <= lastIndex; i++) {
+        const fieldKey = `${field}[${lastIndex}]`
+        this.deleteField(fieldKey as never)
+      }
+    }
+  }
+
+  /**
+   * Filter the array values by the provided predicate.
+   * @param predicate — The predicate callback to pass to the array's filter function.
+   */
+  filterFieldValues = <
+    TField extends DeepKeys<TFormData>,
+    TData extends DeepValue<TFormData, TField>,
+  >(
+    field: TField,
+    predicate: (
+      value: TData extends Array<any> ? TData[number] : never,
+      index: number,
+      array: TData,
+    ) => boolean,
+    opts?: UpdateMetaOptions & {
+      /** `thisArg` — An object to which the this keyword can refer in the predicate function. If thisArg is omitted, undefined is used as the this value. */
+      thisArg?: any
+    },
+  ) => {
+    const { thisArg, ...metaOpts } = opts ?? {}
+    const fieldValue = this.getFieldValue(field)
+
+    const previousLength = Array.isArray(fieldValue) ? fieldValue.length : null
+
+    const remainingIndeces: number[] = []
+    this.setFieldValue(
+      field,
+      (prev: any) =>
+        prev.filter((value: any, index: number, array: TData) => {
+          const keepElement = predicate.bind(opts?.thisArg)(value, index, array)
+          if (!keepElement) return false
+          remainingIndeces.push(index)
+          return true
+        }),
+      metaOpts,
+    )
+
+    // Shift meta accounting for filtered values
+    metaHelper(this).handleArrayFieldMetaShift(
+      field,
+      remainingIndeces,
+      'filter',
+    )
+
+    // remove dangling fields from the filtered array's last index to the unfiltered last index
+    if (previousLength !== null && remainingIndeces.length !== previousLength) {
+      for (let i = remainingIndeces.length; i < previousLength; i++) {
+        const fieldKey = `${field}[${i}]`
+        this.deleteField(fieldKey as never)
+      }
+    }
+  }
+
+  /**
    * Resets the field value and meta to default state
    */
   resetField = <TField extends DeepKeys<TFormData>>(field: TField) => {
