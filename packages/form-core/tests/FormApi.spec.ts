@@ -2908,28 +2908,26 @@ describe('form api', () => {
     expect(form.state.canSubmit).toBe(true)
   })
 
-  it('should delete fields when calling clearFieldValues', () => {
+  it('should delete fields when resetting an array field to an empty array', () => {
+    const employees = [
+      {
+        firstName: 'Darcy',
+      },
+    ] as const
+
     const form = new FormApi({
       defaultValues: {
-        items: ['item1', 'item2', 'item3'],
+        employees,
       },
     })
-
     form.mount()
 
-    // Ensure the initial state has the fields
-    expect(form.getFieldValue('items')).toEqual(['item1', 'item2', 'item3'])
+    form.clearValues('employees')
 
-    // Reset the field to an empty array
-    form.clearFieldValues('items')
-
-    // Verify that the field value is now an empty array
-    expect(form.getFieldValue('items')).toEqual([])
-
-    // Verify that the fields are deleted
-    expect(
-      Object.keys(form.fieldInfo).some((key) => key.startsWith('items[')),
-    ).toBe(false)
+    expect(form.getFieldValue('employees')).toEqual([])
+    expect(form.getFieldValue(`employees[0]`)).toBeUndefined()
+    expect(form.getFieldMeta(`employees[0]`)).toBeUndefined()
+    expect(form.state.values.employees).toStrictEqual([])
   })
 
   it('should filter fields when calling filterFieldValues', () => {
