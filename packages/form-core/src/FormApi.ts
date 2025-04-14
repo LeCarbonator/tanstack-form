@@ -1972,14 +1972,14 @@ export class FormApi<
     const fieldValue = this.getFieldValue(field)
 
     const lastIndex = Array.isArray(fieldValue)
-      ? Math.max(fieldValue.length - 1, 0)
+      ? Math.max((fieldValue as unknown[]).length - 1, 0)
       : null
 
     this.setFieldValue(field, [] as any, opts)
 
     if (lastIndex !== null) {
       for (let i = 0; i <= lastIndex; i++) {
-        const fieldKey = `${field}[${lastIndex}]`
+        const fieldKey = `${field}[${i}]`
         this.deleteField(fieldKey as never)
       }
     }
@@ -2007,7 +2007,9 @@ export class FormApi<
     const { thisArg, ...metaOpts } = opts ?? {}
     const fieldValue = this.getFieldValue(field)
 
-    const previousLength = Array.isArray(fieldValue) ? fieldValue.length : null
+    const previousLength = Array.isArray(fieldValue)
+      ? (fieldValue as unknown[]).length
+      : null
 
     const remainingIndeces: number[] = []
     this.setFieldValue(
