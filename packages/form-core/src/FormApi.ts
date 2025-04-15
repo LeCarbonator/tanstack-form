@@ -1983,6 +1983,9 @@ export class FormApi<
         this.deleteField(fieldKey as never)
       }
     }
+
+    // validate array change
+    this.validateField(field, 'change')
   }
 
   /**
@@ -2007,17 +2010,28 @@ export class FormApi<
     const { thisArg, ...metaOpts } = opts ?? {}
     const fieldValue = this.getFieldValue(field)
 
-    const previousLength = Array.isArray(fieldValue)
-      ? (fieldValue as unknown[]).length
-      : null
+    const arrayData = {
+      previousLength: Array.isArray(fieldValue)
+        ? (fieldValue as unknown[]).length
+        : null,
+      validateFromIndex: null as number | null,
+    }
 
     const remainingIndeces: number[] = []
+
+    const filterFunction =
+      opts?.thisArg === undefined ? predicate : predicate.bind(opts.thisArg)
+
     this.setFieldValue(
       field,
       (prev: any) =>
         prev.filter((value: any, index: number, array: TData) => {
-          const keepElement = predicate.bind(opts?.thisArg)(value, index, array)
-          if (!keepElement) return false
+          const keepElement = filterFunction(value, index, array)
+          if (!keepElement) {
+            // remember the first index that got filtered
+            arrayData.validateFromIndex ??= index
+            return false
+          }
           remainingIndeces.push(index)
           return true
         }),
@@ -2031,12 +2045,25 @@ export class FormApi<
       'filter',
     )
 
-    // remove dangling fields from the filtered array's last index to the unfiltered last index
-    if (previousLength !== null && remainingIndeces.length !== previousLength) {
-      for (let i = remainingIndeces.length; i < previousLength; i++) {
+    // remove dangling fields if the filter call reduced the length of the array
+    if (
+      arrayData.previousLength !== null &&
+      remainingIndeces.length !== arrayData.previousLength
+    ) {
+      for (let i = remainingIndeces.length; i < arrayData.previousLength; i++) {
         const fieldKey = `${field}[${i}]`
         this.deleteField(fieldKey as never)
       }
+    }
+
+    // validate the array and the fields starting from the shifted elements
+    this.validateField(field, 'change')
+    if (arrayData.validateFromIndex !== null) {
+      this.validateArrayFieldsStartingFrom(
+        field,
+        arrayData.validateFromIndex,
+        'change',
+      )
     }
   }
 

@@ -2990,16 +2990,16 @@ describe('form api', () => {
       [ 'items[8]', 'i', true ],
       [ 'items[9]', 'j', false ]
     */
-    function touchField(index: number) {
+    function blurField(index: number) {
       form.setFieldMeta(`items[${index}]`, (prev) => ({
         ...prev,
-        isTouched: true,
+        isBlurred: true,
       }))
     }
-    touchField(1)
-    touchField(3)
-    touchField(6)
-    touchField(8)
+    blurField(1)
+    blurField(3)
+    blurField(6)
+    blurField(8)
 
     form.filterFieldValues(
       'items',
@@ -3023,12 +3023,12 @@ describe('form api', () => {
     expect(form.getFieldValue(`items[${4}]`)).toBe('h')
     expect(form.getFieldValue(`items[${5}]`)).toBe('i')
     expect(form.getFieldValue(`items[${6}]`)).toBe('j')
-    expect(form.getFieldMeta(`items[${0}]`)?.isTouched).toBe(false)
-    expect(form.getFieldMeta(`items[${1}]`)?.isTouched).toBe(true)
-    expect(form.getFieldMeta(`items[${2}]`)?.isTouched).toBe(true)
-    expect(form.getFieldMeta(`items[${3}]`)?.isTouched).toBe(false)
-    expect(form.getFieldMeta(`items[${4}]`)?.isTouched).toBe(false)
-    expect(form.getFieldMeta(`items[${5}]`)?.isTouched).toBe(true)
-    expect(form.getFieldMeta(`items[${6}]`)?.isTouched).toBe(false)
+    expect(form.getFieldMeta(`items[${0}]`)?.isBlurred).toBe(false)
+    expect(form.getFieldMeta(`items[${1}]`)?.isBlurred).toBe(true)
+    expect(form.getFieldMeta(`items[${2}]`)?.isBlurred).toBe(true)
+    expect(form.getFieldMeta(`items[${3}]`)?.isBlurred).toBe(false)
+    expect(form.getFieldMeta(`items[${4}]`)?.isBlurred).toBe(false)
+    expect(form.getFieldMeta(`items[${5}]`)?.isBlurred).toBe(true)
+    expect(form.getFieldMeta(`items[${6}]`)?.isBlurred).toBe(false)
   })
 })

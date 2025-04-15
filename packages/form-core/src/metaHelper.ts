@@ -6,7 +6,8 @@ import type {
 import type { AnyFieldMeta } from './FieldApi'
 import type { DeepKeys } from './util-types'
 
-type ArrayFieldMode = 'insert' | 'remove' | 'swap' | 'move' | 'filter'
+type ValueFieldMode = 'insert' | 'remove' | 'swap' | 'move'
+type ArrayFieldMode = 'filter'
 
 export const defaultFieldMeta: AnyFieldMeta = {
   isValidating: false,
@@ -46,18 +47,18 @@ export function metaHelper<
   function handleArrayFieldMetaShift(
     field: DeepKeys<TFormData>,
     remainingIndeces: number[],
-    mode: Extract<ArrayFieldMode, 'filter'>,
+    mode: ArrayFieldMode,
   ): void
   function handleArrayFieldMetaShift(
     field: DeepKeys<TFormData>,
     index: number,
-    mode: Extract<ArrayFieldMode, 'insert' | 'remove' | 'swap' | 'move'>,
+    mode: ValueFieldMode,
     secondIndex?: number,
   ): void
   function handleArrayFieldMetaShift(
     field: DeepKeys<TFormData>,
     index: number | number[],
-    mode: ArrayFieldMode,
+    mode: ArrayFieldMode | ValueFieldMode,
     secondIndex?: number,
   ) {
     if (Array.isArray(index)) {
@@ -65,9 +66,14 @@ export function metaHelper<
         return handleFilterMode(field, index)
       }
     } else {
-      const affectedFields = getAffectedFields(field, index, mode, secondIndex)
+      const affectedFields = getAffectedFields(
+        field,
+        index,
+        mode as ValueFieldMode,
+        secondIndex,
+      )
 
-      switch (mode) {
+      switch (mode as ValueFieldMode) {
         case 'insert':
           return handleInsertMode(affectedFields, field, index)
         case 'remove':
@@ -82,8 +88,6 @@ export function metaHelper<
             secondIndex !== undefined &&
             handleMoveMode(affectedFields, field, index, secondIndex)
           )
-        default:
-          break
       }
     }
   }
@@ -98,7 +102,7 @@ export function metaHelper<
   function getAffectedFields(
     field: DeepKeys<TFormData>,
     index: number,
-    mode: ArrayFieldMode,
+    mode: ValueFieldMode,
     secondIndex?: number,
   ): DeepKeys<TFormData>[] {
     const affectedFieldKeys = [getFieldPath(field, index)]
