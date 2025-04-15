@@ -2922,7 +2922,7 @@ describe('form api', () => {
     })
     form.mount()
 
-    form.clearValues('employees')
+    form.clearFieldValues('employees')
 
     expect(form.getFieldValue('employees')).toEqual([])
     expect(form.getFieldValue(`employees[0]`)).toBeUndefined()
@@ -2963,7 +2963,7 @@ describe('form api', () => {
     expect(form.getFieldValue('items')).toEqual(['a', 'b', 'd', 'f'])
   })
 
-  it.only('should shift meta when calling filterFieldValues', () => {
+  it('should shift meta when calling filterFieldValues', () => {
     const form = new FormApi({
       defaultValues: {
         items: ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'],
